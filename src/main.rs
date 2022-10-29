@@ -17,5 +17,6 @@ fn main() {
                                                         .shiny()
                                                         .name("Pika")
                                                         .finish();
+
     println!("Pikachu's name is {}", pika.get_name());
 }
