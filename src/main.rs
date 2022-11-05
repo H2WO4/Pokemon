@@ -7,7 +7,6 @@
 #![feature(const_trait_impl)]
 
 mod pokemon;
-mod types;
 
 use pokemon::{species, Pokemon};
 

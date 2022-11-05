@@ -1,50 +1,32 @@
 use species::Species;
 
 pub mod evs;
+pub mod ivs;
+pub mod nature;
 pub mod species;
+pub mod stats;
+pub mod types;
 
-#[derive(Clone, Copy)]
-pub struct Stats {
-    hp:     u8,
-    atk:    u8,
-    def:    u8,
-    sp_atk: u8,
-    sp_def: u8,
-    spd:    u8,
+pub use evs::EVs;
+pub use ivs::IVs;
+pub use nature::Nature;
+pub use stats::Stats;
+pub use types::{Dual, PokeType, Single};
+
+
+#[macro_export]
+macro_rules! all_lower {
+	($var:ident $($varr:ident)* <= $bound:literal) => {
+		($var <= $bound) $(&& ($varr <= $bound))*
+	};
 }
-impl Stats {
-    pub const fn new(hp: u8, atk: u8, def: u8, sp_atk: u8, sp_def: u8, spd: u8) -> Self {
-        Self { hp,
-               atk,
-               def,
-               sp_atk,
-               sp_def,
-               spd }
-    }
+#[macro_export]
+macro_rules! sum_lower {
+	($var:ident $($varr:ident)* <= $bound:literal) => {
+		(($var as u16) $(+ ($varr as u16))*) <= $bound
+	};
 }
 
-pub struct IVs {
-    hp:     u8,
-    atk:    u8,
-    def:    u8,
-    sp_atk: u8,
-    sp_def: u8,
-    spd:    u8,
-}
-impl IVs {
-    pub const fn new(hp: u8, atk: u8, def: u8, sp_atk: u8, sp_def: u8, spd: u8) -> Self {
-        if hp > 31 || atk > 31 || def > 31 || sp_atk > 31 || sp_def > 31 || spd > 31 {
-            panic!()
-        } else {
-            Self { hp,
-                   atk,
-                   def,
-                   sp_atk,
-                   sp_def,
-                   spd }
-        }
-    }
-}
 
 pub struct Pokemon {
     species: Species,
@@ -54,8 +36,8 @@ pub struct Pokemon {
     is_shiny: bool,
 }
 impl Pokemon {
-    pub const fn build(species: Species) -> builder::Normal {
-        builder::Normal::new(species)
+    pub const fn build(species: Species) -> builder::Const {
+        builder::Const::new(species)
     }
 
     pub fn get_name(&self) -> &str {
@@ -63,10 +45,60 @@ impl Pokemon {
             .as_ref()
             .map_or(self.species.name, |name| name)
     }
+
+    pub fn nickname<T: Into<String>>(&mut self, name: T) {
+        self.name = Some(name.into());
+    }
 }
 
 mod builder {
     use super::*;
+
+    #[derive(Clone, Copy)]
+    pub struct Const {
+        species: Species,
+        level:   Option<u8>,
+
+        is_shiny: bool,
+        ivs:      Option<IVs>,
+    }
+    impl Const {
+        pub(super) const fn new(species: Species) -> Self {
+            Self { species,
+                   level: None,
+
+                   is_shiny: false,
+                   ivs: None }
+        }
+
+        pub const fn level(self, level: u8) -> Self {
+            Self { level: Some(level),
+                   ..self }
+        }
+
+        pub const fn shiny(self) -> Self {
+            Self { is_shiny: true,
+                   ..self }
+        }
+
+        pub const fn ivs(self, ivs: IVs) {
+            todo!()
+        }
+
+        pub const fn finish(self) -> Pokemon {
+            Pokemon { species:  self.species,
+                      name:     None,
+                      level:    self.level.unwrap_or(100),
+                      is_shiny: self.is_shiny, }
+        }
+
+        pub fn name<T: Into<String>>(self, name: T) -> Normal {
+            Normal { species:  self.species,
+                     name:     Some(name.into()),
+                     level:    self.level,
+                     is_shiny: self.is_shiny, }
+        }
+    }
 
     pub struct Normal {
         species: Species,
@@ -76,13 +108,6 @@ mod builder {
         is_shiny: bool,
     }
     impl Normal {
-        pub(super) const fn new(species: Species) -> Self {
-            Self { species,
-                   level: None,
-                   name: None,
-                   is_shiny: false }
-        }
-
         pub fn level(self, level: u8) -> Self {
             Self { level: Some(level),
                    ..self }
