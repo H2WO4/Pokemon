@@ -14,40 +14,30 @@ pub use stats::Stats;
 pub use types::{Dual, PokeType, Single};
 
 
-#[macro_export]
-macro_rules! all_lower {
-	($var:ident $($varr:ident)* <= $bound:literal) => {
-		($var <= $bound) $(&& ($varr <= $bound))*
-	};
-}
-#[macro_export]
-macro_rules! sum_lower {
-	($var:ident $($varr:ident)* <= $bound:literal) => {
-		(($var as u16) $(+ ($varr as u16))*) <= $bound
-	};
-}
-
-
 pub struct Pokemon {
-    species: Species,
-    name:    Option<String>,
-    level:   u8,
+    species:  &'static Species,
+    nickname: Option<String>,
+    level:    u8,
+
+    nature: Nature,
+    ivs:    IVs,
+    evs:    EVs,
 
     is_shiny: bool,
 }
 impl Pokemon {
-    pub const fn build(species: Species) -> builder::Const {
+    pub const fn build(species: &'static Species) -> builder::Const {
         builder::Const::new(species)
     }
 
     pub fn get_name(&self) -> &str {
-        self.name
+        self.nickname
             .as_ref()
             .map_or(self.species.name, |name| name)
     }
 
     pub fn nickname<T: Into<String>>(&mut self, name: T) {
-        self.name = Some(name.into());
+        self.nickname = Some(name.into());
     }
 }
 
@@ -56,19 +46,25 @@ mod builder {
 
     #[derive(Clone, Copy)]
     pub struct Const {
-        species: Species,
+        species: &'static Species,
         level:   Option<u8>,
 
+        nature: Option<Nature>,
+        ivs:    Option<IVs>,
+        evs:    Option<EVs>,
+
         is_shiny: bool,
-        ivs:      Option<IVs>,
     }
     impl Const {
-        pub(super) const fn new(species: Species) -> Self {
+        pub(super) const fn new(species: &'static Species) -> Self {
             Self { species,
                    level: None,
 
-                   is_shiny: false,
-                   ivs: None }
+                   nature: None,
+                   ivs: None,
+                   evs: None,
+
+                   is_shiny: false }
         }
 
         pub const fn level(self, level: u8) -> Self {
@@ -76,59 +72,91 @@ mod builder {
                    ..self }
         }
 
-        pub const fn shiny(self) -> Self {
-            Self { is_shiny: true,
+        pub const fn nature(self, nature: Nature) -> Self {
+            Self { nature: Some(nature),
                    ..self }
         }
 
-        pub const fn ivs(self, ivs: IVs) {
-            todo!()
+        pub const fn ivs(self, ivs: IVs) -> Self {
+            Self { ivs: Some(ivs), ..self }
+        }
+
+        pub const fn evs(self, evs: EVs) -> Self {
+            Self { evs: Some(evs), ..self }
+        }
+
+        pub const fn shiny(self) -> Self {
+            Self { is_shiny: true, ..self }
         }
 
         pub const fn finish(self) -> Pokemon {
             Pokemon { species:  self.species,
-                      name:     None,
-                      level:    self.level.unwrap_or(100),
+                      nickname: None,
+                      level:    self.level.unwrap_or(1),
+
+                      nature: self.nature.unwrap(),
+                      ivs:    self.ivs.unwrap_or_default(),
+                      evs:    self.evs.unwrap_or_default(),
+
                       is_shiny: self.is_shiny, }
         }
 
-        pub fn name<T: Into<String>>(self, name: T) -> Normal {
+        pub fn nickname<T: Into<String>>(self, name: T) -> Normal {
             Normal { species:  self.species,
-                     name:     Some(name.into()),
+                     nickname: Some(name.into()),
                      level:    self.level,
+
+                     nature: self.nature,
+                     ivs:    self.ivs,
+                     evs:    self.evs,
+
                      is_shiny: self.is_shiny, }
         }
     }
 
     pub struct Normal {
-        species: Species,
-        level:   Option<u8>,
-        name:    Option<String>,
+        species:  &'static Species,
+        level:    Option<u8>,
+        nickname: Option<String>,
+
+        nature: Option<Nature>,
+        ivs:    Option<IVs>,
+        evs:    Option<EVs>,
 
         is_shiny: bool,
     }
+    #[allow(clippy::missing_const_for_fn)]
     impl Normal {
         pub fn level(self, level: u8) -> Self {
             Self { level: Some(level),
                    ..self }
         }
 
+        pub fn ivs(self, ivs: IVs) -> Self {
+            Self { ivs: Some(ivs), ..self }
+        }
+
+        pub fn evs(self, evs: EVs) -> Self {
+            Self { evs: Some(evs), ..self }
+        }
+
         pub fn shiny(self) -> Self {
-            Self { is_shiny: true,
+            Self { is_shiny: true, ..self }
+        }
+
+        pub fn nickname<T: Into<String>>(self, name: T) -> Self {
+            Self { nickname: Some(name.into()),
                    ..self }
         }
 
-        pub fn name<T: Into<String>>(self, name: T) -> Self {
-            Self { species:  self.species,
-                   level:    self.level,
-                   name:     Some(name.into()),
-                   is_shiny: self.is_shiny, }
-        }
-
         pub fn finish(self) -> Pokemon {
-            Pokemon { species: self.species,
-                      name:    self.name,
-                      level:   self.level.unwrap_or(1),
+            Pokemon { species:  self.species,
+                      nickname: self.nickname,
+                      level:    self.level.unwrap_or(1),
+
+                      nature: self.nature.unwrap_or_else(Nature::random),
+                      ivs:    self.ivs.unwrap_or_default(),
+                      evs:    self.evs.unwrap_or_default(),
 
                       is_shiny: self.is_shiny, }
         }

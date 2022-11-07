@@ -1,8 +1,12 @@
 use crate::pokemon::stats::Stats;
 use crate::pokemon::PokeType;
 
-pub mod vals;
-pub use vals::*;
+pub mod evolution;
+pub mod species;
+
+// use evolution::LineInner;
+pub use species::*;
+
 
 pub enum PokeClass {
     Normal,
@@ -11,6 +15,7 @@ pub enum PokeClass {
     Baby,
 }
 
+#[allow(clippy::upper_case_acronyms)]
 pub enum Gen {
     I,
     II,
@@ -29,6 +34,7 @@ pub struct Species {
     pub(super) name:  &'static str,
     pub(super) stats: Stats,
     pub(super) ptype: PokeType,
+    // pub(super) evolution: Option<LineInner<2>>,
 }
 impl Species {
     const fn build(id: u16) -> builder::WithId {
@@ -111,7 +117,7 @@ mod builder {
                      ptype: ptype.into(),
 
                      class:     PokeClass::Normal,
-                     evolve_to: None,
+                    //  evolution: None,
                      is_form:   false, }
         }
     }
@@ -125,7 +131,7 @@ mod builder {
         ptype: PokeType,
 
         class:     PokeClass,
-        evolve_to: Option<Species>,
+        // evolution: Option<LineInner<2>>,
         is_form:   bool,
     }
     impl Normal {
@@ -133,14 +139,13 @@ mod builder {
             Self { class, ..self }
         }
 
-        pub const fn evolve_to(self, evolve_to: Species) -> Self {
-            Self { evolve_to: Some(evolve_to),
-                   ..self }
-        }
+        // pub const fn evolution(self, evolution: LineInner<2>) -> Self {
+        //     Self { evolution: Some(evolution),
+        //            ..self }
+        // }
 
         pub const fn form(self) -> Self {
-            Self { is_form: true,
-                   ..self }
+            Self { is_form: true, ..self }
         }
 
         pub const fn finish(self) -> Species {
@@ -148,6 +153,7 @@ mod builder {
                       name:  self.name,
                       stats: self.stats,
                       ptype: self.ptype, }
+            //   evolution: self.evolution, }
         }
     }
 }
