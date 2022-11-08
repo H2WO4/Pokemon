@@ -1,7 +1,5 @@
 use rand::seq::SliceRandom;
 use rand::thread_rng;
-use strum::EnumCount;
-use strum_macros::EnumCount;
 use Modifier::*;
 use Nature::*;
 
@@ -20,7 +18,7 @@ impl Modifier {
     }
 }
 
-#[derive(Clone, Copy, EnumCount)]
+#[derive(Clone, Copy)]
 pub enum Nature {
     Adamant,
     Bashful,
@@ -91,10 +89,9 @@ impl Nature {
 }
 impl Nature {
     pub fn random() -> Self {
-        const VALS: [Nature; Nature::COUNT] = [Adamant, Bashful, Bold, Brave, Calm, Careful,
-                                               Docile, Gentle, Hardy, Hasty, Impish, Jolly, Lax,
-                                               Lonely, Mild, Modest, Naive, Naughty, Quiet,
-                                               Quirky, Rash, Relaxed, Sassy, Serious, Timid];
+        const VALS: [Nature; 25] = [Adamant, Bashful, Bold, Brave, Calm, Careful, Docile, Gentle, Hardy, Hasty,
+                                    Impish, Jolly, Lax, Lonely, Mild, Modest, Naive, Naughty, Quiet, Quirky, Rash,
+                                    Relaxed, Sassy, Serious, Timid];
         *VALS.choose(&mut thread_rng()).unwrap()
     }
 }
