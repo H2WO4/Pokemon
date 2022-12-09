@@ -114,3 +114,19 @@ pub const ARCEUS: Species = Species::build(493).name("Arceus")
                                                .ptype(Normal)
                                                .class(PokeClass::Legendary)
                                                .finish();
+
+pub const MEW: Species = Species::build(151).name("Mew")
+                                            .genus("New Species Pokemon")
+                                            .gen(Gen::I)
+                                            .stats(Stats::new(100, 100, 100, 100, 100, 100))
+                                            .ptype(Psychic)
+                                            .class(PokeClass::Mythical)
+                                            .finish();
+
+// pub const MEWTWO: Species = Species::builder().name("Mewtwo")
+//                                               .genus("Genetic Pokemon")
+//                                               .gen(Gen::I)
+//                                               .stats(Stats::new(106, 110, 90, 154, 90, 130))
+//                                               .ptype(Psychic)
+//                                               .class(PokeClass::Legendary)
+//                                               .finish();

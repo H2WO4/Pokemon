@@ -10,10 +10,13 @@
 #![feature(const_mut_refs)]
 #![feature(const_ptr_read)]
 #![feature(const_slice_index)]
+#![feature(type_changing_struct_update)]
+#![feature(associated_type_bounds)]
 
 mod pokemon;
 
-use pokemon::{species, Pokemon};
+// use pokemon::species::{self, Species};
+// use pokemon::{PokeType, Pokemon, Stats};
 
 #[macro_export]
 macro_rules! all_is {
@@ -63,10 +66,10 @@ macro_rules! sum_is {
 
 
 fn main() {
-    let pika: Pokemon = Pokemon::build(&species::PIKACHU).level(5)
-                                                         .shiny()
-                                                         .nickname("Pika")
-                                                         .finish();
+    // let pika: Pokemon = Pokemon::build(&species::PIKACHU).level(5)
+    //                                                      .shiny()
+    //                                                      .nickname("Pika")
+    //                                                      .finish();
 
-    println!("Pikachu's name is {}", pika.get_name());
+    // println!("Pikachu's name is {}", pika.get_name());
 }
